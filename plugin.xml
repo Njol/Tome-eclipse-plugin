@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+ <extension
+       id="nature"
+       name="Tome Nature"
+       point="org.eclipse.core.resources.natures">
+    <runtime>
+       <run
+             class="ch.njol.tome.eclipse.Nature">
+       </run>
+    </runtime>
+ </extension>
+ <extension
+       id="builder"
+       name="Tome Builder"
+       point="org.eclipse.core.resources.builders">
+    <builder
+          callOnEmptyDelta="false"
+          hasNature="false"
+          isConfigurable="false"
+          supportsConfigurations="false">
+       <run
+             class="ch.njol.tome.eclipse.Builder">
+       </run>
+    </builder>
+ </extension>
+ <extension
+       point="org.eclipse.core.contenttype.contentTypes">
+    <content-type
+          default-charset="UTF-8"
+          file-extensions="brok"
+          id="ch.njol.tome.eclipse.sourceFileContentType"
+          name="Tome source file"
+          priority="normal">
+    </content-type>
+ </extension>
+ <extension
+       point="org.eclipse.ui.editors">
+    <editor
+          class="ch.njol.tome.eclipse.Editor"
+          contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+          extensions="tome"
+          icon="icons/sourcefile.png"
+          id="ch.njol.tome.eclipse.Editor"
+          name="Tome Editor">
+    </editor>
+ </extension>
+<extension point="org.eclipse.ui.ide.markerResolution">
+	<markerResolutionGenerator
+		markerType="org.eclipse.core.resources.problemmarker"
+		class="ch.njol.tome.eclipse.MarkerResolutionGenerator"/>
+</extension>
+ <extension
+       point="org.eclipse.core.contenttype.contentTypes">
+    <content-type
+          default-charset="UTF-8"
+          file-extensions="tomeshelf"
+          id="ch.njol.tome.eclipse.moduleFileContentType"
+          name="Tome module file"
+          priority="normal">
+    </content-type>
+ </extension>
+ <extension
+       point="org.eclipse.ui.editors">
+    <editor
+          class="ch.njol.tome.eclipse.Editor"
+          contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+          extensions="tomeshelf"
+          icon="icons/modulefile.png"
+          id="ch.njol.tome.eclipse.TomeModuleEditor"
+          name="Tome Module Editor">
+    </editor>
+ </extension>
+ <extension
+       point="org.eclipse.ui.newWizards">
+    <category
+          id="ch.njol.tome.eclipse.newCategory"
+          name="Tome">
+    </category>
+    <wizard
+          category="ch.njol.tome.eclipse.newCategory"
+          class="ch.njol.tome.eclipse.NewSourceFileWizard"
+          icon="icons/sourcefile.png"
+          id="ch.njol.tome.eclipse.NewSourceFileWizard"
+          name="Tome Source File"
+          project="false">
+    </wizard>
+    <wizard
+          category="ch.njol.tome.eclipse.newCategory"
+          class="ch.njol.tome.eclipse.NewModuleWizard"
+          icon="icons/modulefile.png"
+          id="ch.njol.tome.eclipse.NewModuleWizard"
+          name="Tome Module"
+          project="false">
+    </wizard>
+    <wizard
+          category="ch.njol.tome.eclipse.newCategory"
+          class="ch.njol.tome.eclipse.NewProjectWizard"
+          icon="icons/sourcefile.png"
+          id="ch.njol.tome.eclipse.NewProjectWizard"
+          name="Tome Project"
+          project="true">
+    </wizard>
+ </extension>
+ <extension
+       id="syntaxError"
+       name="Syntax Error"
+       point="org.eclipse.core.resources.markers">
+       <super
+             type="org.eclipse.core.resources.problemmarker">
+       </super>
+       <persistent
+             value="true">
+       </persistent>
+ </extension>
+ <extension
+       id="linkerError"
+       name="Linker Error"
+       point="org.eclipse.core.resources.markers">
+       <super
+             type="org.eclipse.core.resources.problemmarker">
+       </super>
+       <persistent
+             value="true">
+       </persistent>
+ </extension>
+ <extension
+       id="semanticError"
+       name="Semantic Error"
+       point="org.eclipse.core.resources.markers">
+       <super
+             type="org.eclipse.core.resources.problemmarker">
+       </super>
+       <persistent
+             value="true">
+       </persistent>
+ </extension>
+</plugin>

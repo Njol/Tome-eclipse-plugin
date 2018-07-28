@@ -10,8 +10,8 @@ import org.eclipse.swt.graphics.ImageData;
 
 public enum Images {
 	
-	fileIcon("brokkrfile"),//
-	moduleIcon("module"),//
+	fileIcon("sourcefile"),//
+	moduleIcon("modulefile"),//
 	
 	classIcon("class"),//
 	interfaceIcon("interface"),//

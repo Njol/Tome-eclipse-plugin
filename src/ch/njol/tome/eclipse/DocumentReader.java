@@ -4,9 +4,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
-import ch.njol.tome.compiler.BrokkrReader;
+import ch.njol.tome.compiler.SourceReader;
 
-public class DocumentReader implements BrokkrReader {
+public class DocumentReader implements SourceReader {
 	
 	public final IDocument document;
 	

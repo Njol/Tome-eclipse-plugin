@@ -1,5 +1,7 @@
 package ch.njol.tome.eclipse;
 
+import static ch.njol.tome.Constants.*;
+
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
@@ -35,7 +37,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 		@SuppressWarnings("null")
 		protected Page() {
 			super("page1");
-			setTitle("New Brokkr module");
+			setTitle("New "+LANGUAGE_NAME+" module");
 		}
 		
 		@Override

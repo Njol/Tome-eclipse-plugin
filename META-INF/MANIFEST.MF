@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Brokkr Eclipse Plugin
-Bundle-SymbolicName: ch.njol.brokkr.eclipse.plugin;singleton:=true
-Automatic-Module-Name: ch.njol.brokkr.eclipse.plugin
+Bundle-Name: Tome Eclipse Plugin
+Bundle-SymbolicName: ch.njol.tome.eclipse.plugin;singleton:=true
+Automatic-Module-Name: ch.njol.tome.eclipse.plugin
 Bundle-Version: 0.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: 
- ch.njol.brokkr.compiler,
+ ch.njol.tome.compiler,
  org.eclipse.jdt.annotation,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.ui,
@@ -20,3 +20,4 @@ Require-Bundle:
  org.eclipse.ui.ide
 Bundle-Activator: ch.njol.tome.eclipse.Plugin
 Export-Package: ch.njol.tome.eclipse
+Import-Package: ch.njol.tome.compiler

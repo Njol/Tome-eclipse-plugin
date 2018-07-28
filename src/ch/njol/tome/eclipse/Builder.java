@@ -1,5 +1,7 @@
 package ch.njol.tome.eclipse;
 
+import static ch.njol.tome.Constants.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,19 +35,20 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.annotation.Nullable;
 
+import ch.njol.tome.ast.ASTDocument;
 import ch.njol.tome.ast.ASTElement;
 import ch.njol.tome.ast.ASTTopLevelElements.ASTSourceFile;
-import ch.njol.tome.compiler.ASTModule;
-import ch.njol.tome.compiler.BrokkrReader;
 import ch.njol.tome.compiler.Linker;
 import ch.njol.tome.compiler.LinkerError;
-import ch.njol.tome.compiler.ParseError;
+import ch.njol.tome.compiler.SourceReader;
 import ch.njol.tome.compiler.StringReader;
 import ch.njol.tome.compiler.Token;
-import ch.njol.tome.compiler.TokenList;
 import ch.njol.tome.compiler.Token.CommentToken;
 import ch.njol.tome.compiler.Token.WordOrSymbols;
+import ch.njol.tome.compiler.TokenList;
 import ch.njol.tome.eclipse.Plugin.DocumentData;
+import ch.njol.tome.moduleast.ASTModule;
+import ch.njol.tome.parser.ParseError;
 
 public class Builder extends IncrementalProjectBuilder {
 	
@@ -84,7 +87,7 @@ public class Builder extends IncrementalProjectBuilder {
 	
 	@Override
 	protected IProject @Nullable [] build(final int kind, @Nullable final Map<String, String> args, @Nullable final IProgressMonitor monitor) throws CoreException {
-		final SubMonitor sm = SubMonitor.convert(monitor, "Brokkr Build", 100);
+		final SubMonitor sm = SubMonitor.convert(monitor, LANGUAGE_NAME + " Build", 100);
 		final SubMonitor findChangesMonitor = sm.split(10);
 		findChangesMonitor.setWorkRemaining(100);
 		
@@ -126,7 +129,7 @@ public class Builder extends IncrementalProjectBuilder {
 				public boolean visit(final @Nullable IResourceProxy proxy) throws CoreException {
 					if (proxy == null)
 						return false;
-					if (proxy.getName().endsWith(".brok") || proxy.getName().endsWith(".brokmod")) {
+					if (proxy.getName().endsWith(".brok") || proxy.getName().endsWith("." + MODULE_FILE_EXTENSION)) {
 						final IResource res = proxy.requestResource();
 						if (res instanceof IFile) {
 							filesToRebuild.add((IFile) res);
@@ -147,7 +150,7 @@ public class Builder extends IncrementalProjectBuilder {
 			if (doc == null)
 				continue;
 			
-			final DocumentData<?> data = Plugin.getData(file.getFullPath(), new StringReader(doc), file.getName().endsWith(".brokmod") ? Plugin.brokkrModuleParser : Plugin.brokkrParser(file));
+			final DocumentData<?> data = Plugin.getData(file.getFullPath(), new StringReader(doc), file.getName().endsWith("." + MODULE_FILE_EXTENSION) ? Plugin.moduleParser : Plugin.sourceFileParser(file));
 			createSyntaxMarkers(data, file);
 			
 			if (parseMonitor.isCanceled())
@@ -169,8 +172,8 @@ public class Builder extends IncrementalProjectBuilder {
 		sm.done();
 		return null;
 	}
-
-	public static void updateMarkersAndLink(IResource file, DocumentData<?> data) {
+	
+	public static void updateMarkersAndLink(final IResource file, final DocumentData<?> data) {
 		deleteMarkers(file);
 		createSyntaxMarkers(data, file);
 		fixModules();
@@ -179,11 +182,11 @@ public class Builder extends IncrementalProjectBuilder {
 				linkAll(null);
 			else
 				link(file, data);
-		} catch (CoreException e) {}
+		} catch (final CoreException e) {}
 	}
 	
 	/**
-	 * Fixes all module &lt;-> Brokkr file references.
+	 * Fixes all module &lt;-> source file references.
 	 */
 	private static void fixModules() {
 		for (final Entry<IPath, DocumentData<?>> e : Plugin.getAllData()) {
@@ -270,7 +273,7 @@ public class Builder extends IncrementalProjectBuilder {
 	final static Pattern commentTaskKeywords = Pattern.compile("\\b(FIXME|BUG|TODO|LANG|REM(?:IND)?)\\b");
 	
 	public final static void createSyntaxMarkers(final DocumentData<?> data, final IResource file) {
-		createSyntaxMarkers(data.reader, data.tokens, data.ast, file);
+		createSyntaxMarkers(data.reader, data.tokens, data.astDocument, file);
 	}
 	
 	/**
@@ -281,7 +284,7 @@ public class Builder extends IncrementalProjectBuilder {
 	 * @param ast
 	 * @param file
 	 */
-	public final static void createSyntaxMarkers(final BrokkrReader reader, final TokenList tokens, final ASTElement ast, final IResource file) {
+	public final static void createSyntaxMarkers(final SourceReader reader, final TokenList tokens, final ASTDocument<?> ast, final IResource file) {
 		try {
 			file.getWorkspace().run(new ICoreRunnable() {
 				@Override

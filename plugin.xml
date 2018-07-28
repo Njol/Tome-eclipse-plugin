@@ -135,4 +135,42 @@
              value="true">
        </persistent>
  </extension>
+ <extension
+       point="org.eclipse.ui.commands">
+       <command
+             id="ch.njol.tome.eclipse.commands.togglecomment"
+             categoryId="org.eclipse.ui.category.textEditor"
+             name="Toggle Tome Comment"
+             description="Toggles line comments on the selected lines in Tome files">
+       </command>
+ </extension>
+ <extension
+       point="org.eclipse.ui.handlers">
+    <handler
+          commandId="ch.njol.tome.eclipse.commands.togglecomment"
+          class="ch.njol.tome.eclipse.handlers.ToggleCommentHandler">
+    </handler>
+ </extension>
+ <extension
+       point="org.eclipse.ui.contexts">
+    <context
+          id="ch.njol.tome.eclipse.contexts.editorScope"
+          parentId="org.eclipse.ui.contexts.window"
+          name="Editing Tome Source">
+    </context>
+ </extension>
+ <extension point="org.eclipse.ui.bindings">
+		<key sequence="M1+7"
+			commandId="ch.njol.tome.eclipse.commands.togglecomment"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+			contextId="ch.njol.tome.eclipse.contexts.editorScope"/>
+		<key sequence="M1+/"
+			commandId="ch.njol.tome.eclipse.commands.togglecomment"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+			contextId="ch.njol.tome.eclipse.contexts.editorScope"/>
+		<key sequence="M1+M2+C"
+			commandId="ch.njol.tome.eclipse.commands.togglecomment"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+			contextId="ch.njol.tome.eclipse.contexts.editorScope"/>
+	</extension>
 </plugin>

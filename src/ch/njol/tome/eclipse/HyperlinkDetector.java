@@ -14,7 +14,6 @@ import ch.njol.tome.ast.ASTLink;
 import ch.njol.tome.ast.ASTMembers.ASTMemberModifiers;
 import ch.njol.tome.ast.ASTTopLevelElements.ASTSourceFile;
 import ch.njol.tome.ast.ASTTopLevelElements.ASTModuleIdentifier;
-import ch.njol.tome.compiler.ASTModule;
 import ch.njol.tome.compiler.SourceCodeLinkable;
 import ch.njol.tome.compiler.Token;
 import ch.njol.tome.compiler.Token.SymbolToken;
@@ -22,6 +21,7 @@ import ch.njol.tome.compiler.Token.WordOrSymbols;
 import ch.njol.tome.compiler.Token.WordToken;
 import ch.njol.tome.eclipse.Plugin.DocumentData;
 import ch.njol.tome.ir.definitions.IRMemberRedefinition;
+import ch.njol.tome.moduleast.ASTModule;
 
 class HyperlinkDetector implements IHyperlinkDetector, IHyperlinkDetectorExtension2 {
 	

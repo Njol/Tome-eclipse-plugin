@@ -30,14 +30,11 @@ class TextHover implements ITextHover, ITextHoverExtension {
 	
 	final Editor editor;
 	
-	/**
-	 * @param brokkrSourceViewerConfiguration
-	 */
 	TextHover(final Editor editor) {
 		this.editor = editor;
 	}
 	
-	private static class BrokkrInformationControlCreator implements IInformationControlCreator {
+	private static class InformationControlCreator implements IInformationControlCreator {
 		@Override
 		public IInformationControl createInformationControl(final Shell parent) {
 			return new DefaultInformationControl(parent); // TODO make styled text and such (e.g. using
@@ -48,7 +45,7 @@ class TextHover implements ITextHover, ITextHoverExtension {
 	
 	@Override
 	public @NonNull IInformationControlCreator getHoverControlCreator() {
-		return new BrokkrInformationControlCreator();
+		return new InformationControlCreator();
 	}
 	
 	@Override

@@ -1,5 +1,7 @@
 package ch.njol.tome.eclipse;
 
+import static ch.njol.tome.Constants.*;
+
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +31,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import ch.njol.tome.ast.ASTTopLevelElements.ASTModuleIdentifier;
 import ch.njol.tome.common.ModuleIdentifier;
 
 public class NewSourceFileWizard extends Wizard implements INewWizard {
@@ -61,7 +62,7 @@ public class NewSourceFileWizard extends Wizard implements INewWizard {
 		@SuppressWarnings("null")
 		protected Page() {
 			super("page1");
-			setTitle("New Brokkr source file");
+			setTitle("New " + LANGUAGE_NAME + " source file");
 		}
 		
 		@Override
@@ -203,7 +204,7 @@ public class NewSourceFileWizard extends Wizard implements INewWizard {
 	@Override
 	public boolean performFinish() {
 		try {
-			String module = page.moduleText.getText();
+			final String module = page.moduleText.getText();
 			getContainer().run(true, false, monitor -> {
 				try {
 					doFinish(page.resultFile, module, monitor);

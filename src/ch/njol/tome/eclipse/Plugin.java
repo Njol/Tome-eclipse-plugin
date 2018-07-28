@@ -17,26 +17,27 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
+import ch.njol.tome.ast.ASTDocument;
 import ch.njol.tome.ast.ASTElement;
 import ch.njol.tome.ast.ASTTopLevelElements.ASTSourceFile;
 import ch.njol.tome.common.ModuleIdentifier;
-import ch.njol.tome.compiler.ASTModule;
-import ch.njol.tome.compiler.BrokkrReader;
 import ch.njol.tome.compiler.Lexer;
 import ch.njol.tome.compiler.Modules;
+import ch.njol.tome.compiler.SourceReader;
 import ch.njol.tome.compiler.TokenList;
-import ch.njol.tome.eclipse.Plugin.DocumentData.Parser;
+import ch.njol.tome.eclipse.Plugin.DocumentData.DocumentDataParser;
+import ch.njol.tome.moduleast.ASTModule;
 
 public class Plugin extends AbstractUIPlugin {
 	
-	public final static String ID = "ch.njol.brokkr.eclipse.plugin";
+	public final static String ID = "ch.njol.tome.eclipse.plugin";
 	public final static String SYNTAX_ERROR_ID = ID + ".syntaxError";
 	public final static String LINKER_ERROR_ID = ID + ".linkerError";
 	
 	public Plugin() {}
 	
 //	@SuppressWarnings("null")
-//	private static BrokkrPlugin instance = null;
+//	private static Plugin instance = null;
 	
 	@Override
 	public void start(@Nullable final BundleContext context) throws Exception {
@@ -60,39 +61,41 @@ public class Plugin extends AbstractUIPlugin {
 	final static Modules modules = new Modules("<super modules>");
 	
 	public static @Nullable ASTModule getModule(final ModuleIdentifier id) {
-		return modules.get(id);
+		return modules.get(id); 
 	}
 	
-	public final static Parser<ASTSourceFile> brokkrParser(final IFile file) {
+	public final static DocumentDataParser<ASTSourceFile> sourceFileParser(final IFile file) {
 		return data -> ASTSourceFile.parseFile(modules, "" + file.getFullPath().toString(), data.tokens);
 	}
 	
 	@SuppressWarnings("null")
-	public final static Parser<ASTModule> brokkrModuleParser = data -> {
+	public final static DocumentDataParser<ASTModule> moduleParser = data -> {
 		if (data.ast != null) // happens in the constructor
 			modules.unregister(data.ast);
-		final ASTModule m = ASTModule.load(modules, data.tokens.stream());
-		modules.register(m);
+		final ASTDocument<ASTModule> m = ASTModule.load(modules, data.tokens.stream());
+		modules.register(m.root());
 		return m;
 	};
 	
 	public final static class DocumentData<T extends ASTElement> {
-		public static interface Parser<T extends ASTElement> {
-			public T parse(DocumentData<T> data);
+		public static interface DocumentDataParser<T extends ASTElement> {
+			public ASTDocument<T> parse(DocumentData<T> data);
 		}
 		
-		public DocumentData(final BrokkrReader reader, final Parser<T> parser) {
+		public DocumentData(final SourceReader reader, final DocumentDataParser<T> parser) {
 			this.reader = reader;
 			lexer = new Lexer(reader);
 			tokens = lexer.list();
 			this.parser = parser;
-			ast = parser.parse(this);
+			astDocument = parser.parse(this);
+			ast = astDocument.root();
 		}
 		
-		public BrokkrReader reader;
+		public SourceReader reader;
 		public Lexer lexer;
 		public TokenList tokens;
-		public Parser<T> parser;
+		public DocumentDataParser<T> parser;
+		public ASTDocument<T> astDocument;
 		public T ast;
 		
 		// TODO make this incremental
@@ -101,29 +104,31 @@ public class Plugin extends AbstractUIPlugin {
 			lexer.update(0, reader.getLength());
 			tokens = lexer.list();
 			ast.invalidateSubtree();
-			ast = parser.parse(this);
+			astDocument = parser.parse(this);
+			ast = astDocument.root();
 		}
 		
-		public void update(final BrokkrReader reader) {
+		public void update(final SourceReader reader) {
 			if (reader.equals(this.reader))
 				return;
 			this.reader = reader;
 			lexer = new Lexer(reader);
 			tokens = lexer.list();
 			ast.invalidateSubtree();
-			ast = parser.parse(this);
+			astDocument = parser.parse(this);
+			ast = astDocument.root();
 		}
 	}
 	
 	public final static ConcurrentMap<IPath, DocumentData<?>> documentData = new ConcurrentHashMap<>();
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends ASTElement> DocumentData<T> getData(final IPath file, final BrokkrReader reader, final Parser<? extends T> parser) {
+	public static <T extends ASTElement> DocumentData<T> getData(final IPath file, final SourceReader reader, final DocumentDataParser<? extends T> parser) {
 		DocumentData<?> d = documentData.get(file);
 		if (d == null) {
 			documentData.put(file, d = new DocumentData<>(reader, parser));
 		} else {
-			assert (parser == brokkrModuleParser) == (d.parser == brokkrModuleParser) : file + " / " + d.ast.getClass() + ", " + (parser == brokkrModuleParser);
+			assert (parser == moduleParser) == (d.parser == moduleParser) : file + " / " + d.ast.getClass() + ", " + (parser == moduleParser);
 			d.update(reader);
 		}
 		return (DocumentData<T>) d;

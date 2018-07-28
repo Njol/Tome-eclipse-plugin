@@ -87,7 +87,7 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 				c = colorManager.unqualifiedAttribute();
 			} else if (element instanceof ASTVariable && isToken(t, ((ASTVariable) element).name())) {
 				c = colorManager.localVariable();
-			} else if (element instanceof ASTAttributeDeclaration) {
+			} else if (element instanceof ASTAttributeDeclaration && isToken(t, ((ASTAttributeDeclaration) element).name())) {
 				c = colorManager.unqualifiedAttribute();
 			}
 			if (c != null || fontStyle != SWT.NORMAL) {

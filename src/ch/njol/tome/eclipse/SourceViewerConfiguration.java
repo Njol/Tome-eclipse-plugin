@@ -2,6 +2,7 @@ package ch.njol.tome.eclipse;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
@@ -24,7 +25,7 @@ public class SourceViewerConfiguration extends org.eclipse.jface.text.source.Sou
 	
 	private final PresentationDamagerRepairer presentationDamagerRepairer;
 	private final PresentationReconciler presentationReconciler = new PresentationReconciler();
-
+	
 	private final HyperlinkDetector hyperlinkDetector;
 	
 	public SourceViewerConfiguration(final Editor editor, final ColorManager colorManager) {
@@ -37,10 +38,15 @@ public class SourceViewerConfiguration extends org.eclipse.jface.text.source.Sou
 		hyperlinkDetector = new HyperlinkDetector(editor);
 	}
 	
+	@Override
+	public IAutoEditStrategy @Nullable [] getAutoEditStrategies(final ISourceViewer sourceViewer, final String contentType) {
+		return null; // TODO auto indent, MAYBE auto complete brackets/strings (if done properly!)
+	}
+	
 	// reconciler - runs repeatedly in the background (can be used to run the parts
 	// of the compiler not needed for syntax highlighting)
 	
-	// private final class BrokkrReconcilingStrategy implements
+	// private final class ReconcilingStrategy implements
 	// IReconcilingStrategy, IReconcilingStrategyExtension {
 	// @Override
 	// public void setDocument(@SuppressWarnings("null") final IDocument doc) {}
@@ -59,7 +65,7 @@ public class SourceViewerConfiguration extends org.eclipse.jface.text.source.Sou
 	// public void initialReconcile() {}
 	// }
 	
-	// BrokkrReconcilingStrategy strategy = new BrokkrReconcilingStrategy();
+	// ReconcilingStrategy strategy = new ReconcilingStrategy();
 	
 	// private final IReconciler reconciler = new MonoReconciler(strategy, true);
 	

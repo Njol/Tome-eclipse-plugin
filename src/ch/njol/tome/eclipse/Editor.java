@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
-import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ch.njol.tome.ast.ASTElement;
@@ -44,11 +43,11 @@ import ch.njol.tome.ast.ASTTopLevelElements.ASTClassDeclaration;
 import ch.njol.tome.ast.ASTTopLevelElements.ASTExtensionDeclaration;
 import ch.njol.tome.ast.ASTTopLevelElements.ASTInterfaceDeclaration;
 import ch.njol.tome.ast.ASTTopLevelElements.ASTModuleDeclaration;
-import ch.njol.tome.compiler.ASTModule;
-import ch.njol.tome.compiler.ASTModule.Import;
-import ch.njol.tome.compiler.ASTModuleFileElement.ListElement;
-import ch.njol.tome.compiler.ASTModuleFileElement.MapElement;
 import ch.njol.tome.eclipse.Plugin.DocumentData;
+import ch.njol.tome.moduleast.ASTModule;
+import ch.njol.tome.moduleast.ASTModule.ASTImport;
+import ch.njol.tome.moduleast.ASTModuleFileElement.ListElement;
+import ch.njol.tome.moduleast.ASTModuleFileElement.MapElement;
 
 // TODO highlight matching brackets?
 public class Editor extends AbstractDecoratedTextEditor implements ITextListener {
@@ -59,6 +58,7 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 		colorManager = new ColorManager();
 		setSourceViewerConfiguration(new SourceViewerConfiguration(this, colorManager));
 		setDocumentProvider(new TextFileDocumentProvider());
+		setKeyBindingScopes(new String[] {"ch.njol.tome.eclipse.contexts.editorScope"});
 //		setWordWrap(true); // TODO figure out where/when to set this or wait for eclipse to re-add the option
 	}
 	
@@ -81,7 +81,7 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 				data.update(new DocumentReader(document));
 			return data;
 		}
-		return Plugin.getData(path, new DocumentReader(document), "brokmod".equals(file.getFileExtension()) ? Plugin.brokkrModuleParser : Plugin.brokkrParser(file));
+		return Plugin.getData(path, new DocumentReader(document), "brokmod".equals(file.getFileExtension()) ? Plugin.moduleParser : Plugin.sourceFileParser(file));
 	}
 	
 	@Override
@@ -257,7 +257,7 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 				ASTInterfaceDeclaration.class, ASTClassDeclaration.class, /*EnumDeclaration.class,*/ ASTExtensionDeclaration.class, //
 				ASTAttributeDeclaration.class, ASTConstructor.class, ASTTemplate.class, //EnumElement.class, //
 				// module stuff:
-				ASTModule.class, Import.class, MapElement.class, ListElement.class));
+				ASTModule.class, ASTImport.class, MapElement.class, ListElement.class));
 	}
 	
 	private final static boolean isInOutline(final Object e) {
@@ -327,7 +327,7 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 		return null;
 	}
 	
-	private final class BrokkrContentOutlinePage extends ContentOutlinePage {
+	private final class ContentOutlinePage extends org.eclipse.ui.views.contentoutline.ContentOutlinePage {
 		@Override
 		public @Nullable TreeViewer getTreeViewer() {
 			return super.getTreeViewer();
@@ -390,7 +390,7 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 		}
 	}
 	
-	private final BrokkrContentOutlinePage contentOutlinePage = new BrokkrContentOutlinePage();
+	private final ContentOutlinePage contentOutlinePage = new ContentOutlinePage();
 	
 	@SuppressWarnings("unchecked")
 	@Override

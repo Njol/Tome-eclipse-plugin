@@ -1,5 +1,7 @@
 package ch.njol.tome.eclipse;
 
+import static ch.njol.tome.Constants.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,9 +34,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import ch.njol.tome.ast.ASTTopLevelElements.ASTModuleIdentifier;
 import ch.njol.tome.common.ModuleIdentifier;
-import ch.njol.tome.compiler.ASTModule;
+import ch.njol.tome.moduleast.ASTModule;
 
 public class NewModuleWizard extends Wizard implements INewWizard {
 	
@@ -42,7 +43,8 @@ public class NewModuleWizard extends Wizard implements INewWizard {
 	
 	@Override
 	public void init(@SuppressWarnings("null") final IWorkbench workbench, @SuppressWarnings("null") final IStructuredSelection selection) {
-		@Nullable Object selected = selection.getFirstElement();
+		@Nullable
+		Object selected = selection.getFirstElement();
 		if (!(selected instanceof IResource) && selected instanceof IAdaptable)
 			selected = ((IAdaptable) selected).getAdapter(IResource.class);
 		if (selected instanceof IContainer)
@@ -60,7 +62,7 @@ public class NewModuleWizard extends Wizard implements INewWizard {
 		@SuppressWarnings("null")
 		protected Page() {
 			super("page1");
-			setTitle("New Brokkr module");
+			setTitle("New " + LANGUAGE_NAME + " module");
 		}
 		
 		@Override
@@ -161,7 +163,7 @@ public class NewModuleWizard extends Wizard implements INewWizard {
 	@Override
 	public boolean performFinish() {
 		try {
-			String id = page.idText.getText();
+			final String id = page.idText.getText();
 			getContainer().run(true, false, monitor -> {
 				try {
 					doFinish(new ModuleIdentifier(id), page.resultFile, monitor);

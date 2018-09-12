@@ -40,7 +40,6 @@ import ch.njol.tome.ast.ASTElement;
 import ch.njol.tome.ast.ASTTopLevelElements.ASTSourceFile;
 import ch.njol.tome.compiler.Linker;
 import ch.njol.tome.compiler.LinkerError;
-import ch.njol.tome.compiler.SourceReader;
 import ch.njol.tome.compiler.StringReader;
 import ch.njol.tome.compiler.Token;
 import ch.njol.tome.compiler.Token.CommentToken;
@@ -49,6 +48,7 @@ import ch.njol.tome.compiler.TokenList;
 import ch.njol.tome.eclipse.Plugin.DocumentData;
 import ch.njol.tome.moduleast.ASTModule;
 import ch.njol.tome.parser.ParseError;
+import ch.njol.util.CollectionUtils;
 
 public class Builder extends IncrementalProjectBuilder {
 	
@@ -63,11 +63,16 @@ public class Builder extends IncrementalProjectBuilder {
 			if (!firstRun)
 				return;
 			firstRun = false;
-			try {
-				for (final IProject p : ResourcesPlugin.getWorkspace().getRoot().getProjects())
-					p.build(FULL_BUILD, null);
-			} catch (final CoreException e) {
-				e.printStackTrace();
+			for (final IProject p : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+				try {
+					if (p.isOpen() && CollectionUtils.anyMatch(p.getDescription().getBuildSpec(), c -> Nature.BUILDER_ID.equals(c.getBuilderName()))) {
+						p.build(FULL_BUILD, null);
+					}
+				} catch (OperationCanceledException e) {
+					// ignore
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
@@ -97,7 +102,7 @@ public class Builder extends IncrementalProjectBuilder {
 		// find changed files
 		final IResourceDelta delta = getDelta(getProject());
 		if ((kind == INCREMENTAL_BUILD || kind == AUTO_BUILD) && delta != null) {
-			// incemental build
+			// incremental build
 			delta.accept(new IResourceDeltaVisitor() {
 				@Override
 				public boolean visit(final @Nullable IResourceDelta delta) throws CoreException {
@@ -150,7 +155,7 @@ public class Builder extends IncrementalProjectBuilder {
 			if (doc == null)
 				continue;
 			
-			final DocumentData<?> data = Plugin.getData(file.getFullPath(), new StringReader(doc), file.getName().endsWith("." + MODULE_FILE_EXTENSION) ? Plugin.moduleParser : Plugin.sourceFileParser(file));
+			final DocumentData<?> data = Plugin.getData(file, new StringReader(doc), file.getName().endsWith("." + MODULE_FILE_EXTENSION) ? Plugin.moduleParser : Plugin.sourceFileParser(file));
 			createSyntaxMarkers(data, file);
 			
 			if (parseMonitor.isCanceled())
@@ -273,7 +278,7 @@ public class Builder extends IncrementalProjectBuilder {
 	final static Pattern commentTaskKeywords = Pattern.compile("\\b(FIXME|BUG|TODO|LANG|REM(?:IND)?)\\b");
 	
 	public final static void createSyntaxMarkers(final DocumentData<?> data, final IResource file) {
-		createSyntaxMarkers(data.reader, data.tokens, data.astDocument, file);
+		createSyntaxMarkers(data.tokens, data.astDocument, file);
 	}
 	
 	/**
@@ -284,7 +289,7 @@ public class Builder extends IncrementalProjectBuilder {
 	 * @param ast
 	 * @param file
 	 */
-	public final static void createSyntaxMarkers(final SourceReader reader, final TokenList tokens, final ASTDocument<?> ast, final IResource file) {
+	public final static void createSyntaxMarkers(final TokenList tokens, final ASTDocument<?> ast, final IResource file) {
 		try {
 			file.getWorkspace().run(new ICoreRunnable() {
 				@Override
@@ -296,12 +301,14 @@ public class Builder extends IncrementalProjectBuilder {
 							attributes.put("" + IMarker.CHAR_START, e.start);
 							attributes.put("" + IMarker.CHAR_END, e.start + e.length);
 							attributes.put("" + IMarker.MESSAGE, e.message);
-							attributes.put("" + IMarker.LINE_NUMBER, reader.getLine(e.start));
+//							attributes.put("" + IMarker.LINE_NUMBER, reader.getLine(e.start));
 							attributes.put("" + IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
 							attributes.put("" + IMarker.USER_EDITABLE, false);
 							final IMarker m = file.createMarker(Plugin.SYNTAX_ERROR_ID);
 							m.setAttributes(attributes);
-						} catch (final CoreException ex) {}
+						} catch (final CoreException ex) {
+							ex.printStackTrace();
+						}
 					}
 					
 					for (final Token t : tokens) {
@@ -318,20 +325,24 @@ public class Builder extends IncrementalProjectBuilder {
 									attributes.put("" + IMarker.CHAR_START, t.absoluteRegionStart() + start);
 									attributes.put("" + IMarker.CHAR_END, t.absoluteRegionStart() + end);
 									attributes.put("" + IMarker.MESSAGE, "" + ((CommentToken) t).comment.substring(start, end));
-									attributes.put("" + IMarker.LINE_NUMBER, reader.getLine(start));
+//									attributes.put("" + IMarker.LINE_NUMBER, reader.getLine(start));
 									attributes.put("" + IMarker.PRIORITY, "FIXME".equals(m.group(1)) || "BUG".equals(m.group(1)) ? IMarker.PRIORITY_HIGH
 											: "REM".equals(m.group(1)) || "REMIND".equals(m.group(1)) ? IMarker.PRIORITY_LOW
 													: IMarker.PRIORITY_NORMAL);
 									attributes.put("" + IMarker.USER_EDITABLE, false);
 									final IMarker marker = file.createMarker(IMarker.TASK); // make own marker type?
 									marker.setAttributes(attributes);
-								} catch (final CoreException ex) {}
+								} catch (final CoreException ex) {
+									ex.printStackTrace();
+								}
 							}
 						}
 					}
 				}
 			}, null, IWorkspace.AVOID_UPDATE, null);
-		} catch (final CoreException ex) {}
+		} catch (final CoreException ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 }

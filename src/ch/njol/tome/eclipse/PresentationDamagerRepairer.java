@@ -51,6 +51,7 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 		final TokenListStream tokens = data.tokens.stream();
 		tokens.setTextOffset(region.getOffset());
 		do {
+			int tokenStart = tokens.getTextOffset();
 			final Token t = tokens.getAndMoveForward();
 			if (t == null)
 				break;
@@ -91,7 +92,7 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 				c = colorManager.unqualifiedAttribute();
 			}
 			if (c != null || fontStyle != SWT.NORMAL) {
-				final StyleRange sr = new StyleRange(t.absoluteRegionStart(), t.regionLength(), c, null);
+				final StyleRange sr = new StyleRange(tokenStart, t.regionLength(), c, null);
 				sr.fontStyle = fontStyle;
 				addStyleRange(presentation, sr);
 			}
@@ -100,14 +101,14 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 				int start = 0;
 				while (true) {
 					if (m.find()) {
-						StyleRange sr = new StyleRange(t.absoluteRegionStart() + start, m.start() - start, colorManager.comment(), null);
+						StyleRange sr = new StyleRange(tokenStart + start, m.start() - start, colorManager.comment(), null);
 						addStyleRange(presentation, sr);
-						sr = new StyleRange(t.absoluteRegionStart() + m.start(), m.end() - m.start(), colorManager.commentTask(), null);
+						sr = new StyleRange(tokenStart + m.start(), m.end() - m.start(), colorManager.commentTask(), null);
 						sr.fontStyle = SWT.BOLD;
 						addStyleRange(presentation, sr);
 						start = m.end();
 					} else {
-						final StyleRange sr = new StyleRange(t.absoluteRegionStart() + start, t.regionLength() - start, colorManager.comment(), null);
+						final StyleRange sr = new StyleRange(tokenStart + start, t.regionLength() - start, colorManager.comment(), null);
 						addStyleRange(presentation, sr);
 						break;
 					}

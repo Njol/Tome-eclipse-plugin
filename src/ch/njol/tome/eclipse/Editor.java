@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.text.DocumentEvent;
@@ -35,6 +34,7 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import ch.njol.tome.Constants;
 import ch.njol.tome.ast.ASTElement;
 import ch.njol.tome.ast.ASTMembers.ASTAttributeDeclaration;
 import ch.njol.tome.ast.ASTMembers.ASTConstructor;
@@ -58,7 +58,7 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 		colorManager = new ColorManager();
 		setSourceViewerConfiguration(new SourceViewerConfiguration(this, colorManager));
 		setDocumentProvider(new TextFileDocumentProvider());
-		setKeyBindingScopes(new String[] {"ch.njol.tome.eclipse.contexts.editorScope"});
+		setKeyBindingScopes(new String[] {Plugin.BASE_ID + ".contexts.editorScope"});
 //		setWordWrap(true); // TODO figure out where/when to set this or wait for eclipse to re-add the option
 	}
 	
@@ -68,20 +68,19 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 		if (!(resource instanceof IFile))
 			return null;
 		final IFile file = (IFile) resource;
-		final IPath path = file.getFullPath();
 		final ISourceViewer sourceViewer = getSourceViewer();
 		if (sourceViewer == null)
 			return null;
 		final IDocument document = sourceViewer.getDocument();
 		if (document == null)
 			return null;
-		final DocumentData<?> data = Plugin.getData(path);
+		final DocumentData<?> data = Plugin.getData(file);
 		if (data != null) {
 			if (!(data.reader instanceof DocumentReader) || ((DocumentReader) data.reader).document != document)
 				data.update(new DocumentReader(document));
 			return data;
 		}
-		return Plugin.getData(path, new DocumentReader(document), "brokmod".equals(file.getFileExtension()) ? Plugin.moduleParser : Plugin.sourceFileParser(file));
+		return Plugin.getData(file, new DocumentReader(document), Constants.MODULE_FILE_EXTENSION.equals(file.getFileExtension()) ? Plugin.moduleParser : Plugin.sourceFileParser(file));
 	}
 	
 	@Override
@@ -116,11 +115,8 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 		if (data != null) {
 			data.update(event.getOffset(), Math.max(event.getLength(), event.getText().length()));
 			outlineChanged();
-			final IResource r = getEditorInput().getAdapter(IResource.class);
-			if (r != null)
-				Builder.updateMarkersAndLink(r, data);
+			AsyncBuilder.notifyChange(data);
 		}
-		
 	}
 	
 //	private void updateMarkers() {

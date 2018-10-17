@@ -25,8 +25,8 @@ public class Nature implements IProjectNature {
 		this.project = project;
 	}
 	
-	public final static String BUILDER_ID = Plugin.BASE_ID + ".builder";
-	public final static String NATURE_ID = Plugin.BASE_ID + ".nature";
+	public final static String BUILDER_ID = Plugin.ID + ".builder";
+	public final static String NATURE_ID = Plugin.ID + ".nature";
 	
 	@Override
 	public void configure() throws CoreException {

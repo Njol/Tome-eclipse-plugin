@@ -36,13 +36,13 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import ch.njol.tome.Constants;
 import ch.njol.tome.ast.ASTElement;
-import ch.njol.tome.ast.ASTMembers.ASTAttributeDeclaration;
-import ch.njol.tome.ast.ASTMembers.ASTConstructor;
-import ch.njol.tome.ast.ASTMembers.ASTTemplate;
-import ch.njol.tome.ast.ASTTopLevelElements.ASTClassDeclaration;
-import ch.njol.tome.ast.ASTTopLevelElements.ASTExtensionDeclaration;
-import ch.njol.tome.ast.ASTTopLevelElements.ASTInterfaceDeclaration;
-import ch.njol.tome.ast.ASTTopLevelElements.ASTModuleDeclaration;
+import ch.njol.tome.ast.members.ASTAttributeDeclaration;
+import ch.njol.tome.ast.members.ASTConstructor;
+import ch.njol.tome.ast.members.ASTTemplate;
+import ch.njol.tome.ast.toplevel.ASTClassDeclaration;
+import ch.njol.tome.ast.toplevel.ASTExtensionDeclaration;
+import ch.njol.tome.ast.toplevel.ASTInterfaceDeclaration;
+import ch.njol.tome.ast.toplevel.ASTModuleDeclaration;
 import ch.njol.tome.eclipse.Plugin.DocumentData;
 import ch.njol.tome.moduleast.ASTModule;
 import ch.njol.tome.moduleast.ASTModule.ASTImport;
@@ -58,7 +58,7 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 		colorManager = new ColorManager();
 		setSourceViewerConfiguration(new SourceViewerConfiguration(this, colorManager));
 		setDocumentProvider(new TextFileDocumentProvider());
-		setKeyBindingScopes(new String[] {Plugin.BASE_ID + ".contexts.editorScope"});
+		setKeyBindingScopes(new String[] {Plugin.ID + ".contexts.editorScope"});
 //		setWordWrap(true); // TODO figure out where/when to set this or wait for eclipse to re-add the option
 	}
 	
@@ -113,7 +113,8 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 		
 		final DocumentData<?> data = getData();
 		if (data != null) {
-			data.update(event.getOffset(), Math.max(event.getLength(), event.getText().length()));
+//			data.update(event.getOffset(), Math.max(event.getLength(), event.getText().length()));
+			data.update();
 			outlineChanged();
 			AsyncBuilder.notifyChange(data);
 		}
@@ -309,7 +310,7 @@ public class Editor extends AbstractDecoratedTextEditor implements ITextListener
 			if (element instanceof ASTAttributeDeclaration) {
 				final ASTAttributeDeclaration attr = (ASTAttributeDeclaration) element;
 				return (attr.modifiers.isStatic ? Images.staticAttributeIcon : Images.instanceAttributeIcon)//
-						.withOverlays(attr.modifiers.override ? !"override".equals(attr.modifiers.overridden.getName()) ? Images.overlay_renamed : null : Images.overlay_new);
+						.withOverlays(attr.modifiers.override ? attr.modifiers.overridden() == null ? Images.overlay_renamed : null : Images.overlay_new);
 			}
 			return null;
 		}

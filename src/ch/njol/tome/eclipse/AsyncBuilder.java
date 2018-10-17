@@ -16,9 +16,9 @@ public class AsyncBuilder {
 	
 	private static AsyncBuilder INSTANCE = new AsyncBuilder();
 	
-	private Set<DocumentData<?>> buildQueue = new LinkedHashSet<>();
+	private final Set<DocumentData<?>> buildQueue = new LinkedHashSet<>();
 	
-	private Thread thread;
+	private final Thread thread;
 	
 	private volatile boolean running = true;
 	
@@ -35,11 +35,11 @@ public class AsyncBuilder {
 				while (buildQueue.isEmpty()) {
 					try {
 						buildQueue.wait();
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						continue outer;
 					}
 				}
-				Iterator<DocumentData<?>> iter = buildQueue.iterator();
+				final Iterator<DocumentData<?>> iter = buildQueue.iterator();
 				data = iter.next();
 				iter.remove();
 			}
@@ -51,11 +51,11 @@ public class AsyncBuilder {
 		}
 	}
 	
-	public static void notifyChange(DocumentData<?> data) {
+	public static void notifyChange(final DocumentData<?> data) {
 		INSTANCE._notifyChange(data);
 	}
 	
-	public void _notifyChange(DocumentData<?> data) {
+	public void _notifyChange(final DocumentData<?> data) {
 		if (!running)
 			return;
 		synchronized (buildQueue) {

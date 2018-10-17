@@ -28,6 +28,8 @@ public class SourceViewerConfiguration extends org.eclipse.jface.text.source.Sou
 	
 	private final HyperlinkDetector hyperlinkDetector;
 	
+	private final AutoEditStrategy autoEditStrategy;
+	
 	public SourceViewerConfiguration(final Editor editor, final ColorManager colorManager) {
 		this.editor = editor;
 		this.colorManager = colorManager;
@@ -36,11 +38,12 @@ public class SourceViewerConfiguration extends org.eclipse.jface.text.source.Sou
 		presentationReconciler.setDamager(presentationDamagerRepairer, IDocument.DEFAULT_CONTENT_TYPE);
 		presentationReconciler.setRepairer(presentationDamagerRepairer, IDocument.DEFAULT_CONTENT_TYPE);
 		hyperlinkDetector = new HyperlinkDetector(editor);
+		autoEditStrategy = new AutoEditStrategy(editor);
 	}
 	
 	@Override
 	public IAutoEditStrategy @Nullable [] getAutoEditStrategies(final ISourceViewer sourceViewer, final String contentType) {
-		return null; // TODO auto indent, MAYBE auto complete brackets/strings (if done properly!)
+		return new IAutoEditStrategy[] {autoEditStrategy};
 	}
 	
 	// reconciler - runs repeatedly in the background (can be used to run the parts

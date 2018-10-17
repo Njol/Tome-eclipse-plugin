@@ -15,12 +15,14 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 
 import ch.njol.tome.ast.ASTElement;
-import ch.njol.tome.ast.ASTExpressions.ASTArgument;
-import ch.njol.tome.ast.ASTExpressions.ASTUnqualifiedMetaAccess;
-import ch.njol.tome.ast.ASTExpressions.ASTVariableOrUnqualifiedAttributeUse;
 import ch.njol.tome.ast.ASTInterfaces.ASTVariable;
-import ch.njol.tome.ast.ASTMembers.ASTAttributeDeclaration;
-import ch.njol.tome.ast.ASTStatements.ASTLambdaMethodCallPart;
+import ch.njol.tome.ast.ASTLink;
+import ch.njol.tome.ast.expressions.ASTArgument;
+import ch.njol.tome.ast.expressions.ASTUnqualifiedMetaAccess;
+import ch.njol.tome.ast.expressions.ASTVariableOrUnqualifiedAttributeUse;
+import ch.njol.tome.ast.expressions.ASTVariableOrUnqualifiedAttributeUse.ASTVariableOrUnqualifiedAttributeUseLink;
+import ch.njol.tome.ast.members.ASTAttributeDeclaration;
+import ch.njol.tome.ast.statements.ASTLambdaMethodCall.ASTLambdaMethodCallPart;
 import ch.njol.tome.compiler.Token;
 import ch.njol.tome.compiler.Token.CodeGenerationToken;
 import ch.njol.tome.compiler.Token.CommentToken;
@@ -51,7 +53,7 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 		final TokenListStream tokens = data.tokens.stream();
 		tokens.setTextOffset(region.getOffset());
 		do {
-			int tokenStart = tokens.getTextOffset();
+			final int tokenStart = tokens.getTextOffset();
 			final Token t = tokens.getAndMoveForward();
 			if (t == null)
 				break;
@@ -67,24 +69,25 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 				c = colorManager.string();
 			} else if (t instanceof CodeGenerationToken) {
 				c = colorManager.codeGeneration();
-			} else if (element instanceof ASTArgument && t == ((ASTArgument) element).parameter.getNameToken()) {
+			} else if (element instanceof ASTArgument && isLink(t, ((ASTArgument) element).parameterLink)) {
 				c = colorManager.parameter();
 			} else if (/*
 						 * parent instanceof LambdaMethodCall && isToken(t, ((LambdaMethodCall)
 						 * parent).method.getName()) // TODO does not work as not direct parent ||
 						 */ element instanceof ASTLambdaMethodCallPart
-					&& t == ((ASTLambdaMethodCallPart) element).parameter.getNameToken()) {
+					&& isLink(t, ((ASTLambdaMethodCallPart) element).parameter)) {
 				// c = colorManager.lambdaMethodCall();
 				c = colorManager.parameter();
 			} else if (element instanceof ASTVariableOrUnqualifiedAttributeUse
-					&& t == ((ASTVariableOrUnqualifiedAttributeUse) element).link.getNameToken()) {
-				final IRVariableOrAttributeRedefinition var = ((ASTVariableOrUnqualifiedAttributeUse) element).link.get();
+					&& isLink(t, ((ASTVariableOrUnqualifiedAttributeUse) element).varOrAttributeLink)) {
+				ASTVariableOrUnqualifiedAttributeUseLink varOrAttributeLink = ((ASTVariableOrUnqualifiedAttributeUse) element).varOrAttributeLink;
+				final IRVariableOrAttributeRedefinition var = varOrAttributeLink != null ? varOrAttributeLink.get() : null;
 				if (var instanceof IRVariableRedefinition) {
 					c = colorManager.localVariable();
 				} else if (var instanceof IRAttributeRedefinition) {
 					c = colorManager.unqualifiedAttribute();
 				}
-			} else if (element instanceof ASTUnqualifiedMetaAccess && t == ((ASTUnqualifiedMetaAccess) element).attribute.getNameToken()) {
+			} else if (element instanceof ASTUnqualifiedMetaAccess && isLink(t, ((ASTUnqualifiedMetaAccess) element).attribute)) {
 				c = colorManager.unqualifiedAttribute();
 			} else if (element instanceof ASTVariable && isToken(t, ((ASTVariable) element).name())) {
 				c = colorManager.localVariable();
@@ -130,6 +133,10 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 	
 	final static boolean isToken(final Token t, final @Nullable String value) {
 		return t instanceof WordToken && ((WordToken) t).word == value;
+	}
+	
+	private static boolean isLink(Token t, @Nullable ASTLink<?> link) {
+		return link == null ? false : link.getNameToken() == t;
 	}
 	
 	@Override

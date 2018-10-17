@@ -3,7 +3,6 @@ package ch.njol.tome.eclipse;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
@@ -38,11 +37,11 @@ public class ColorManager {
 	public final Color keyword() {
 		return get(0, 150, 150); // get(200, 50, 0);
 	}
-
+	
 	public final Color comment() {
 		return get(90, 150, 90);
 	}
-
+	
 	public final Color commentTask() {
 		return get(50, 150, 50);
 	}
@@ -70,9 +69,9 @@ public class ColorManager {
 	public final Color codeGeneration() {
 		return get(150, 150, 150);
 	}
-
+	
 	public final Color string() {
 		return get(0, 0, 200);
 	}
-
+	
 }

@@ -96,7 +96,7 @@ class TextHover implements ITextHover, ITextHoverExtension {
 				}
 				if (e instanceof ASTElementWithIR) {
 					final IRElement ir = ((ASTElementWithIR) e).getIR();
-					result += "\nIR: " + ir + " [" + ir.getClass().getSimpleName() + "]"; // TODO more descriptive result
+					result += "\nIR: " + ir + (ir != null ? " [" + ir.getClass().getSimpleName() + "]" : ""); // TODO more descriptive result
 				}
 			}
 		}

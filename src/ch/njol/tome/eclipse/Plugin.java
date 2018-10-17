@@ -19,7 +19,7 @@ import org.osgi.framework.BundleContext;
 
 import ch.njol.tome.ast.ASTDocument;
 import ch.njol.tome.ast.ASTElement;
-import ch.njol.tome.ast.ASTTopLevelElements.ASTSourceFile;
+import ch.njol.tome.ast.toplevel.ASTSourceFile;
 import ch.njol.tome.common.ModuleIdentifier;
 import ch.njol.tome.compiler.Lexer;
 import ch.njol.tome.compiler.Modules;
@@ -30,10 +30,10 @@ import ch.njol.tome.moduleast.ASTModule;
 
 public class Plugin extends AbstractUIPlugin {
 	
-	public final static String BASE_ID = "ch.njol.tome.eclipse";
-	public final static String PLUGIN_ID = BASE_ID + ".plugin";
-	public final static String SYNTAX_ERROR_ID = BASE_ID + ".syntaxError";
-	public final static String LINKER_ERROR_ID = BASE_ID + ".linkerError";
+	public final static String ID = "ch.njol.tome.eclipse";
+	public final static String SYNTAX_ERROR_ID = ID + ".syntaxError";
+	public final static String LINKER_ERROR_ID = ID + ".linkerError";
+	public final static String SEMANTIC_ERROR_ID = ID + ".semanticError";
 	
 	public Plugin() {}
 	
@@ -56,7 +56,7 @@ public class Plugin extends AbstractUIPlugin {
 	
 	@SuppressWarnings("null")
 	public static Bundle bundle() {
-		return Platform.getBundle(PLUGIN_ID);
+		return Platform.getBundle(ID);
 	}
 	
 	// FIXME make one per project?
@@ -92,7 +92,7 @@ public class Plugin extends AbstractUIPlugin {
 		public ASTDocument<T> astDocument;
 		public T ast;
 		
-		public DocumentData(IFile file, final SourceReader reader, final DocumentDataParser<T> parser) {
+		public DocumentData(final IFile file, final SourceReader reader, final DocumentDataParser<T> parser) {
 			this.file = file;
 			this.reader = reader;
 			lexer = new Lexer(reader);
@@ -102,10 +102,9 @@ public class Plugin extends AbstractUIPlugin {
 			ast = astDocument.root();
 		}
 		
-		// TODO make this incremental
-		public void update(final int start, final int length) {
-			//lexer.update(start, length);
-			lexer.update(0, reader.getLength());
+		// TODO make this incremental?
+		public void update() {
+			lexer.update();
 			tokens = lexer.list();
 			ast.invalidateSubtree();
 			astDocument = parser.parse(this);
@@ -127,8 +126,8 @@ public class Plugin extends AbstractUIPlugin {
 	public final static ConcurrentMap<IPath, DocumentData<?>> documentData = new ConcurrentHashMap<>();
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends ASTElement> DocumentData<T> getData(IFile file, final SourceReader reader, final DocumentDataParser<? extends T> parser) {
-		IPath path = file.getFullPath();
+	public static <T extends ASTElement> DocumentData<T> getData(final IFile file, final SourceReader reader, final DocumentDataParser<? extends T> parser) {
+		final IPath path = file.getFullPath();
 		DocumentData<?> d = documentData.get(path);
 		if (d == null) {
 			documentData.put(path, d = new DocumentData<>(file, reader, parser));

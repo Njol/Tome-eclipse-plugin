@@ -46,7 +46,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		final DocumentData<?> data = editor.getData();
 		if (data == null)
 			return null;
-		Token token = data.tokens.getTokenAt(offset, false);
+		final Token token = data.tokens.getTokenAt(offset, false);
 		if (token == null)
 			return null;
 		final String prefix = token instanceof WordToken ? token.toString().substring(0, offset - token.absoluteRegionStart()) : "";

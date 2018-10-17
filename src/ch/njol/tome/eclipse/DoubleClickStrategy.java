@@ -5,12 +5,12 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextViewer;
 
 import ch.njol.tome.ast.ASTElement;
-import ch.njol.tome.ast.ASTExpressions.ASTOperatorExpression;
+import ch.njol.tome.ast.expressions.ASTOperatorExpression;
 import ch.njol.tome.compiler.Token;
-import ch.njol.tome.compiler.TokenList;
 import ch.njol.tome.compiler.Token.CommentToken;
 import ch.njol.tome.compiler.Token.StringToken;
 import ch.njol.tome.compiler.Token.SymbolToken;
+import ch.njol.tome.compiler.TokenList;
 import ch.njol.tome.eclipse.Plugin.DocumentData;
 import ch.njol.tome.util.TokenListStream;
 
@@ -18,12 +18,12 @@ final class DoubleClickStrategy implements ITextDoubleClickStrategy {
 	
 	private final static String brackets = "(){}[]<>";
 	
-	private Editor editor;
+	private final Editor editor;
 	
-	public DoubleClickStrategy(Editor editor) {
+	public DoubleClickStrategy(final Editor editor) {
 		this.editor = editor;
 	}
-
+	
 	@Override
 	public void doubleClicked(final ITextViewer viewer) {
 		final int offset = viewer.getSelectedRange().x;

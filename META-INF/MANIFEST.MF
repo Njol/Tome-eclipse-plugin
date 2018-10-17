@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tome Eclipse Plugin
-Bundle-SymbolicName: ch.njol.tome.eclipse.plugin;singleton:=true
+Bundle-SymbolicName: ch.njol.tome.eclipse;singleton:=true
 Automatic-Module-Name: ch.njol.tome.eclipse.plugin
 Bundle-Version: 0.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

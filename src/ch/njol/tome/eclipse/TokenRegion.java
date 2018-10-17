@@ -10,7 +10,7 @@ public class TokenRegion implements IRegion {
 	public final Token token;
 	public final int originalOffset;
 	
-	public TokenRegion(final Token token, int originalOffset) {
+	public TokenRegion(final Token token, final int originalOffset) {
 		this.token = token;
 		this.originalOffset = originalOffset;
 	}

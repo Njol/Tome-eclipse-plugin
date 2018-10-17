@@ -37,7 +37,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 		@SuppressWarnings("null")
 		protected Page() {
 			super("page1");
-			setTitle("New "+LANGUAGE_NAME+" module");
+			setTitle("New " + LANGUAGE_NAME + " module");
 		}
 		
 		@Override

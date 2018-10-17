@@ -5,9 +5,9 @@ import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
 public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
-
+	
 	@Override
-	public IMarkerResolution[] getResolutions(IMarker marker) {
+	public IMarkerResolution[] getResolutions(final IMarker marker) {
 		return new IMarkerResolution[0];
 	}
 	

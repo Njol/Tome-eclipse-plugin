@@ -37,13 +37,12 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.tome.ast.ASTDocument;
 import ch.njol.tome.ast.ASTElement;
-import ch.njol.tome.ast.ASTTopLevelElements.ASTSourceFile;
+import ch.njol.tome.ast.toplevel.ASTSourceFile;
 import ch.njol.tome.compiler.Linker;
-import ch.njol.tome.compiler.LinkerError;
+import ch.njol.tome.compiler.SemanticError;
 import ch.njol.tome.compiler.StringReader;
 import ch.njol.tome.compiler.Token;
 import ch.njol.tome.compiler.Token.CommentToken;
-import ch.njol.tome.compiler.Token.WordOrSymbols;
 import ch.njol.tome.compiler.TokenList;
 import ch.njol.tome.eclipse.Plugin.DocumentData;
 import ch.njol.tome.moduleast.ASTModule;
@@ -68,9 +67,9 @@ public class Builder extends IncrementalProjectBuilder {
 					if (p.isOpen() && CollectionUtils.anyMatch(p.getDescription().getBuildSpec(), c -> Nature.BUILDER_ID.equals(c.getBuilderName()))) {
 						p.build(FULL_BUILD, null);
 					}
-				} catch (OperationCanceledException e) {
+				} catch (final OperationCanceledException e) {
 					// ignore
-				} catch (CoreException e) {
+				} catch (final CoreException e) {
 					e.printStackTrace();
 				}
 			}
@@ -134,7 +133,7 @@ public class Builder extends IncrementalProjectBuilder {
 				public boolean visit(final @Nullable IResourceProxy proxy) throws CoreException {
 					if (proxy == null)
 						return false;
-					if (proxy.getName().endsWith(".brok") || proxy.getName().endsWith("." + MODULE_FILE_EXTENSION)) {
+					if (proxy.getName().endsWith("." + SOURCE_FILE_EXTENSION) || proxy.getName().endsWith("." + MODULE_FILE_EXTENSION)) {
 						final IResource res = proxy.requestResource();
 						if (res instanceof IFile) {
 							filesToRebuild.add((IFile) res);
@@ -231,17 +230,13 @@ public class Builder extends IncrementalProjectBuilder {
 	
 	private final static void linkNoRunnable(final IResource file, final DocumentData<?> data) throws CoreException {
 		file.deleteMarkers(Plugin.LINKER_ERROR_ID, true, IResource.DEPTH_INFINITE);
-		final Consumer<LinkerError> errors = (final LinkerError e) -> {
-			final WordOrSymbols nameToken = e.link.getNameToken();
-			if (nameToken == null)
-				return;
+		final Consumer<SemanticError> errors = (final SemanticError e) -> {
 			try {
 				final IMarker m = file.createMarker(Plugin.LINKER_ERROR_ID);
 				m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-				m.setAttribute(IMarker.MESSAGE, "Cannot find '" + e.link.getName() + "'");
-				m.setAttribute(IMarker.CHAR_START, nameToken.absoluteRegionStart());
-				m.setAttribute(IMarker.CHAR_END, nameToken.absoluteRegionEnd());
-//				m.setAttribute(IMarker.LINE_NUMBER, data.reader.getLine(nameToken.absoluteRegionStart()));
+				m.setAttribute(IMarker.MESSAGE, e.message);
+				m.setAttribute(IMarker.CHAR_START, e.start);
+				m.setAttribute(IMarker.CHAR_END, e.start + e.length);
 				m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
 				m.setAttribute(IMarker.USER_EDITABLE, false);
 			} catch (final CoreException ex) {}

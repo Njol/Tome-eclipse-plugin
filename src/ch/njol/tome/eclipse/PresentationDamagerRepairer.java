@@ -57,7 +57,9 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 			final Token t = tokens.getAndMoveForward();
 			if (t == null)
 				break;
-			final ASTElement element = t.parent();
+			ASTElement element = t.parent();
+			if (element instanceof ASTLink)
+				element = element.parent();
 			int fontStyle = SWT.NORMAL;
 			Color c = null;
 			if ((t instanceof WordToken) && ((WordToken) t).keyword) {

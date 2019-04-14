@@ -15,14 +15,17 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 
 import ch.njol.tome.ast.ASTElement;
+import ch.njol.tome.ast.ASTInterfaces.ASTTypeDeclaration;
 import ch.njol.tome.ast.ASTInterfaces.ASTVariable;
 import ch.njol.tome.ast.ASTLink;
 import ch.njol.tome.ast.expressions.ASTArgument;
+import ch.njol.tome.ast.expressions.ASTSimpleTypeUse;
 import ch.njol.tome.ast.expressions.ASTUnqualifiedMetaAccess;
 import ch.njol.tome.ast.expressions.ASTVariableOrUnqualifiedAttributeUse;
 import ch.njol.tome.ast.expressions.ASTVariableOrUnqualifiedAttributeUse.ASTVariableOrUnqualifiedAttributeUseLink;
 import ch.njol.tome.ast.members.ASTAttributeDeclaration;
 import ch.njol.tome.ast.statements.ASTLambdaMethodCall.ASTLambdaMethodCallPart;
+import ch.njol.tome.ast.toplevel.ASTGenericParameterDeclaration;
 import ch.njol.tome.compiler.Token;
 import ch.njol.tome.compiler.Token.CodeGenerationToken;
 import ch.njol.tome.compiler.Token.CommentToken;
@@ -82,7 +85,7 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 				c = colorManager.parameter();
 			} else if (element instanceof ASTVariableOrUnqualifiedAttributeUse
 					&& isLink(t, ((ASTVariableOrUnqualifiedAttributeUse) element).varOrAttributeLink)) {
-				ASTVariableOrUnqualifiedAttributeUseLink varOrAttributeLink = ((ASTVariableOrUnqualifiedAttributeUse) element).varOrAttributeLink;
+				final ASTVariableOrUnqualifiedAttributeUseLink varOrAttributeLink = ((ASTVariableOrUnqualifiedAttributeUse) element).varOrAttributeLink;
 				final IRVariableOrAttributeRedefinition var = varOrAttributeLink != null ? varOrAttributeLink.get() : null;
 				if (var instanceof IRVariableRedefinition) {
 					c = colorManager.localVariable();
@@ -95,6 +98,10 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 				c = colorManager.localVariable();
 			} else if (element instanceof ASTAttributeDeclaration && isToken(t, ((ASTAttributeDeclaration) element).name())) {
 				c = colorManager.unqualifiedAttribute();
+			} else if (element instanceof ASTSimpleTypeUse
+					|| element instanceof ASTTypeDeclaration && t == ((ASTTypeDeclaration) element).nameToken()
+					|| element instanceof ASTGenericParameterDeclaration && t == ((ASTGenericParameterDeclaration) element).nameToken()) {
+				c = colorManager.type();
 			}
 			if (c != null || fontStyle != SWT.NORMAL) {
 				final StyleRange sr = new StyleRange(tokenStart, t.regionLength(), c, null);
@@ -137,7 +144,7 @@ final class PresentationDamagerRepairer implements IPresentationDamager, IPresen
 		return t instanceof WordToken && ((WordToken) t).word == value;
 	}
 	
-	private static boolean isLink(Token t, @Nullable ASTLink<?> link) {
+	private static boolean isLink(final Token t, @Nullable final ASTLink<?> link) {
 		return link == null ? false : link.getNameToken() == t;
 	}
 	

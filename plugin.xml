@@ -160,17 +160,62 @@
     </context>
  </extension>
  <extension point="org.eclipse.ui.bindings">
-		<key sequence="M1+7"
-			commandId="ch.njol.tome.eclipse.commands.togglecomment"
-			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-			contextId="ch.njol.tome.eclipse.contexts.editorScope"/>
-		<key sequence="M1+/"
-			commandId="ch.njol.tome.eclipse.commands.togglecomment"
-			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-			contextId="ch.njol.tome.eclipse.contexts.editorScope"/>
-		<key sequence="M1+M2+C"
-			commandId="ch.njol.tome.eclipse.commands.togglecomment"
-			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-			contextId="ch.njol.tome.eclipse.contexts.editorScope"/>
+	<key sequence="M1+7"
+		commandId="ch.njol.tome.eclipse.commands.togglecomment"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		contextId="ch.njol.tome.eclipse.contexts.editorScope"/>
+	<key sequence="M1+/"
+		commandId="ch.njol.tome.eclipse.commands.togglecomment"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		contextId="ch.njol.tome.eclipse.contexts.editorScope"/>
+	<key sequence="M1+M2+C"
+		commandId="ch.njol.tome.eclipse.commands.togglecomment"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		contextId="ch.njol.tome.eclipse.contexts.editorScope"/>
+</extension>
+<extension
+      point="org.eclipse.debug.core.launchConfigurationTypes">
+    <launchConfigurationType
+          id="ch.njol.tome.eclipse.launchConfigurationType"
+          name="Tome Application"
+          modes="run"
+          delegateName="Tome Launcher"
+          delegateDescription="Default Tome launcher"
+          delegate="ch.njol.tome.eclipse.LaunchConfigurationDelegate">
+    </launchConfigurationType>
+</extension>
+<extension
+      point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+    <launchConfigurationTabGroup
+          class="ch.njol.tome.eclipse.LaunchConfigurationTabGroup"
+          id="ch.njol.tome.eclipse.launchConfigurationTabGroup"
+          type="ch.njol.tome.eclipse.launchConfigurationType">
+    </launchConfigurationTabGroup>
+</extension>
+	<!-- preferences 
+	
+	<extension
+	      point="org.eclipse.core.runtime.preferences">
 	</extension>
+	<extension
+	      point="org.eclipse.ui.preferencePages">
+	    <page
+	          class="ch.njol.tome.eclipse.preferences.pages.RootPage"
+	          id="ch.njol.tome.eclipse.preferences.pages.root"
+	          category=""
+	          name="Tome">
+	    </page>
+	    <page
+	          class="ch.njol.tome.eclipse.preferences.pages.EditorPage"
+	          id="ch.njol.tome.eclipse.preferences.pages.editor"
+	          category="ch.njol.tome.eclipse.preferences.pages.root"
+	          name="Editor">
+	    </page>
+	    <page
+	          class="ch.njol.tome.eclipse.preferences.pages.ColorsPage"
+	          id="ch.njol.tome.eclipse.preferences.pages.colors"
+	          category="ch.njol.tome.eclipse.preferences.pages.editor"
+	          name="Syntax Coloring">
+	    </page>
+	</extension>-->
 </plugin>

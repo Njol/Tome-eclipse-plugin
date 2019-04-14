@@ -1,5 +1,8 @@
 package ch.njol.tome.eclipse;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -89,10 +92,32 @@ class TextHover implements ITextHover, ITextHoverExtension {
 				result += "\nElement Hierarchy at token \"" + token + "\":";
 				ASTElement p = e;
 				while (p != null) {
-					result += "\n    > " + p.getClass().getSimpleName();
+					ASTElement parent = p.parent();
+					result += "\n    > ";
+					if (parent != null) {
+						for (Field f : parent.getClass().getDeclaredFields()) {
+							f.setAccessible(true);
+							try {
+								Object val = f.get(parent);
+								if (val == p) {
+									result += f.getName() + ": ";
+									break;
+								} else if (val instanceof List) {
+									int i = ((List<?>) val).indexOf(p);
+									if (i >= 0) {
+										result += f.getName() + "[" + i + "]: ";
+										break;
+									}
+								}
+							} catch (IllegalArgumentException | IllegalAccessException e1) {
+								e1.printStackTrace();
+							}
+						}
+					}
+					result += p.getClass().getSimpleName();
 					if (p instanceof DebugString)
 						result += " [" + ((DebugString) p).debug() + "]";
-					p = p.parent();
+					p = parent;
 				}
 				if (e instanceof ASTElementWithIR) {
 					final IRElement ir = ((ASTElementWithIR) e).getIR();

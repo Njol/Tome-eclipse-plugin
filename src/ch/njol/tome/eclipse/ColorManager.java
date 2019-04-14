@@ -74,4 +74,8 @@ public class ColorManager {
 		return get(0, 0, 200);
 	}
 	
+	public final Color type() {
+		return get(60, 0, 120);
+	}
+	
 }
